@@ -33,8 +33,8 @@ io.on('connection', function(socket){
     console.log('user disconnected');
     io.emit('User disconnected');
   });
-  socket.on('chat message', function(msg){
-      io.emit('chat message',msg);
+  socket.on('chat message', function(msg,usrname){
+      io.emit('chat message',msg,usrname);
 //    console.log('message: ' + msg);
   });
   socket.on('user typing', function(){

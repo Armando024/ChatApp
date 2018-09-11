@@ -30,9 +30,10 @@
             console.log(a);
             console.log(a.split('/'));
             a=a.split('/');
+            var usrname=a[2];
             socket.emit('User Connects',a[2]);
             $('form').submit(function(){
-                socket.emit('chat message', $('#m').val());
+                socket.emit('chat message', $('#m').val(),usrname);
                 $('#m').val('');
                 
                 return false;
@@ -46,8 +47,8 @@
                 socket.emit('user typing');
             });
 
-            socket.on('chat message', function(msg){
-                $('#messages').append($('<li>').text(msg));
+            socket.on('chat message', function(msg,usrname){
+                $('#messages').append($('<li>').text(usrname+': '+ msg));
             });
 
             socket.on('user typing',function(){
