@@ -11,11 +11,13 @@
       #messages { list-style-type: none; margin: 0; padding: 0; }
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
+      .UserTyping {background: #fff !important;}
     </style>
   </head>
   <body>
     <ul id="messages"></ul>
     <form action="">
+      <div id="usrtyping" class="UserTyping" style="display:none;"><p>Someone is typing...</p> </div>
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>
     <script src="/socket.io/socket.io.js"></script>
@@ -28,8 +30,22 @@
                 $('#m').val('');
                 return false;
             });
+            $('#m').keyup(function(){
+                socket.emit('user typing');
+                return false;
+            });
             socket.on('chat message', function(msg){
                 $('#messages').append($('<li>').text(msg));
+            });
+            socket.on('user typing',function(){
+                //$('#messages').append($('<li>').text('someone is typing'));
+                $('#usrtyping').show();
+            });
+            socket.on('User Connects',function(){
+                $('#messages').append($('<li>').text('New User Connected'));
+            });
+            socket.on('User disconnected',function(){
+                $('#messages').append($('<li>').text('User disconnected'));
             });
         });
 </script>
