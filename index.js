@@ -23,15 +23,19 @@ app.get('/chat/*', function(req, res){
   res.sendFile(__dirname + '/chat.html');
 });
 
+
+
+//Socket Configuration
 io.on('connection', function(socket){
   console.log('a user connected');
     //io.emit('User Connects');
     socket.on('User Connects',function(usrname){
+        socket.username=usrname;
         io.emit('User Connects',usrname); 
     });
   socket.on('disconnect', function(){
     console.log('user disconnected');
-    io.emit('User disconnected');
+    io.emit('User disconnected',socket.username);
   });
   socket.on('chat message', function(msg,usrname){
       io.emit('chat message',msg,usrname);
@@ -39,11 +43,11 @@ io.on('connection', function(socket){
   });
   socket.on('user typing', function(){
       io.emit('user typing');
-      console.log('user typing');
+//      console.log('user typing');
   });
   socket.on('user NOTtyping', function(){
       io.emit('user NOTtyping');
-      console.log('user stop typing');
+  //    console.log('user stop typing');
   });
 });
 
