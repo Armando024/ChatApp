@@ -9,26 +9,33 @@
       .UserTyping {background: #fff !important;}
       .Notification{width:70%; margin:auto; }
       .footer{position:fixed;bottom:0;width:100%}
+      #infousr{
+        list-style:none;
+        padding:0;
+        margin:0;
+      }  
+      #infousr li::before{
+        content:"• ";
+        color:green;
+      }
     </style>
   </head>
   <body>
-      <!--  <ul id="messages"></ul>-->
       <div class="container pt-3">
           <div class="row">
-              <div class="col-md-10">
+              <div class="col-md-9">
                   <div id="messages" class="row">
                   </div>
               </div>
-              <div class="col-md-2">
-                  <h4>Active</h4>
-                  <ul>
+              <div class="col-md-3">
+                  <h4>Active Users:</h4>
+                  <ul id="infousr">
                   </ul>
               </div>
           </div>
       <div>
     <form action="">
-        <div class="footer">
-                <div class="container">
+        <div class="footer pb-4 container">
                     <div class="row">
                         <div class="col-md-12">
                             <div id="usrtyping" class="UserTyping" style="display:none;"><p>Someone is typing...</p> </div>
@@ -42,7 +49,6 @@
                             <button class="btn btn-primary">Send</button>
                         </div>
                     </div>
-                </div>
         </div>
     </form>
     <script src="/socket.io/socket.io.js"></script>
@@ -54,11 +60,45 @@
         $(function () {
             var socket = io();
             var a=window.location.pathname;
-            console.log(a);
-            console.log(a.split('/'));
+            //console.log(a);
+            //console.log(a.split('/'));
             a=a.split('/');
             var usrname=a[2];
-            socket.emit('User Connects',a[2]);
+            var newUser=true; 
+            socket.emit('User Connects',a[2]); //when user initially connects
+
+            socket.on('chat message', function(msg,usrname){
+                console.log('receiving new message');
+                $('#messages').append($('<div class="col-md-12 border-bottom">').html('<b>'+usrname+':</b>'+ msg));
+            });
+
+            socket.on('user typing',function(){
+                $('#usrtyping').show();
+            });
+
+            socket.on('user NOTtyping',function(){
+                $('#usrtyping').hide();
+            });
+            socket.on('User Connects',function(usrname,activeusers){
+                if (newUser) {
+                    var i;
+                    for(i=0;i<activeusers.length;i++){
+                        if(activeusers[i]!=null)
+                        $('#infousr').append($('<li id='+i+' >').text(activeusers[i]));
+                    } 
+                    newUser=false;
+                }
+                else {
+                    var id=activeusers.length-1;
+                $('#infousr').append($('<li id='+id+' >').text(activeusers[id]));
+                }
+                $('#messages').append($('<div class="col-md-12 text-center pt-1 pb-1  alert alert-success">').text(usrname+' connected '));
+            });
+            socket.on('User disconnected',function(usr,id){
+                $('#'+id).remove();
+                $('#messages').append($('<div class="col-md-12 text-center pt-1 pb-1 alert alert-danger">').text(usr+' disconnected'));
+            });
+           //Client events 
             $('form').submit(function(){
                 socket.emit('chat message', $('#m').val(),usrname);
                 $('#m').val('');
@@ -71,28 +111,10 @@
                 }
             });
             $('#m').keydown(function(){
+                if ($('#m').val()!='')
                 socket.emit('user typing');
             });
 
-            socket.on('chat message', function(msg,usrname){
-                $('#messages').append($('<div class="col-md-12">').text(usrname+': '+ msg));
-            });
-
-            socket.on('user typing',function(){
-                //$('#messages').append($('<li>').text('someone is typing'));
-                $('#usrtyping').show();
-            });
-
-            socket.on('user NOTtyping',function(){
-                //$('#messages').append($('<li>').text('someone is typing'));
-                $('#usrtyping').hide();
-            });
-            socket.on('User Connects',function(usrname){
-                $('#messages').append($('<div class="col-md-12 text-center  alert alert-success">').text(usrname+' Connected '));
-            });
-            socket.on('User disconnected',function(usr){
-                $('#messages').append($('<div class="col-md-12 text-center alert alert-danger">').text(usr+' disconnected'));
-            });
         });
 
 </script>

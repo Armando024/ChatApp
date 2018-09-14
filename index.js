@@ -14,40 +14,38 @@ app.get('/', function(req, res){
 });
 
 app.post('/', function(req, res){
-    console.log(req.body);
     res.redirect('/chat/'+req.body.usrname);
-    //res.sendFile(__dirname + '/chat.html');
 });
 
 app.get('/chat/*', function(req, res){
   res.sendFile(__dirname + '/chat.html');
 });
-
-
-
 //Socket Configuration
+//socket is for one client
+//io is for everyone
+var activeusers=[];
+var newuser=[];
 io.on('connection', function(socket){
-  console.log('a user connected');
-    //io.emit('User Connects');
-    socket.on('User Connects',function(usrname){
-        socket.username=usrname;
-        io.emit('User Connects',usrname); 
-    });
+    
+  socket.on('User Connects',function(usrname){
+            socket.username=usrname;
+            activeusers.push(usrname);
+            socket.id=activeusers.length-1;
+            io.emit('User Connects',usrname,activeusers); 
+  });
+
   socket.on('disconnect', function(){
-    console.log('user disconnected');
-    io.emit('User disconnected',socket.username);
+    activeusers[socket.id]=null;
+    io.emit('User disconnected',socket.username,socket.id);
   });
   socket.on('chat message', function(msg,usrname){
-      io.emit('chat message',msg,usrname);
-//    console.log('message: ' + msg);
+      socket.broadcast.emit('chat message',msg,usrname);
   });
   socket.on('user typing', function(){
       io.emit('user typing');
-//      console.log('user typing');
   });
   socket.on('user NOTtyping', function(){
       io.emit('user NOTtyping');
-  //    console.log('user stop typing');
   });
 });
 
