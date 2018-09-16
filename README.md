@@ -3,11 +3,12 @@
 - [x] Allows custom username.
 - [x] Shows when someone is typing
 - [x] Shows active users online
-
+- [x] Added Styling
 ## To execute
     node index.js
 
-## Still in construction....
-- [ ] Styling and making it beatiful 
+## Suggestions....
 - [ ] Suggestions? 
+
+
 
